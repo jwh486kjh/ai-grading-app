@@ -4,7 +4,7 @@ import streamlit as st
 # 페이지 기본 설정
 st.set_page_config(
     page_title="2회 시험 대비 서논술형 자동 채점 시스템",
-    page_icon="📝",
+    page_icon="👩‍🏫",
     layout="wide",
 )
 
@@ -109,7 +109,7 @@ QUESTIONS = {
 }
 
 # ------------------------------------------------------------------------------
-# 2. 사이드바 (왼쪽 전체 길잡이 화면)
+# 2. 사이드바 (전체 길잡이 화면)
 # ------------------------------------------------------------------------------
 with st.sidebar:
   st.header("🧭 서논술형 채점 길잡이")
@@ -148,9 +148,54 @@ with st.sidebar:
   st.caption("2회 시험 대비 서논술형 학습 평가용")
 
 # ------------------------------------------------------------------------------
-# 3. 메인 화면 - 채점 인터페이스
+# 3. 메인 화면 - 커스텀 헤더 (동그란 안경을 쓴 긴머리 여자 선생님 SVG 아이콘 적용)
 # ------------------------------------------------------------------------------
-st.title("📝 2회 시험 대비 서논술형 자동 채점 시스템")
+
+# 동그란 안경을 쓴 긴 머리 여자 선생님 캐릭터 SVG 코드
+teacher_svg = """
+<svg width="55" height="55" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 원 -->
+  <circle cx="50" cy="50" r="48" fill="#E8F1F5"/>
+  <!-- 긴 머리 (뒷머리) -->
+  <path d="M 28,40 C 25,60 25,82 32,88 C 35,90 38,70 38,50 Z" fill="#3D2314"/>
+  <path d="M 72,40 C 75,60 75,82 68,88 C 65,90 62,70 62,50 Z" fill="#3D2314"/>
+  <!-- 몸/옷 -->
+  <path d="M 30,88 C 30,75 40,70 50,70 C 60,70 70,75 70,88 L 70,98 L 30,98 Z" fill="#4B6584"/>
+  <path d="M 45,70 L 50,78 L 55,70 Z" fill="#FFFFFF"/>
+  <!-- 얼굴 -->
+  <circle cx="50" cy="45" r="22" fill="#FAD390"/>
+  <!-- 앞머리 및 긴 머리 (앞쪽) -->
+  <path d="M 28,45 C 28,25 38,20 50,20 C 62,20 72,25 72,45 C 72,30 62,24 50,24 C 38,24 28,30 28,45 Z" fill="#3D2314"/>
+  <path d="M 32,28 C 40,24 45,30 50,28 C 55,26 62,25 68,29 C 62,22 55,21 50,21 C 42,21 35,24 32,28 Z" fill="#2C1A0E"/>
+  <!-- 눈 -->
+  <circle cx="42" cy="45" r="2.5" fill="#2C3A47"/>
+  <circle cx="58" cy="45" r="2.5" fill="#2C3A47"/>
+  <!-- 미소 -->
+  <path d="M 45,54 Q 50,58 55,54" fill="none" stroke="#B33939" stroke-width="2" stroke-linecap="round"/>
+  <!-- 동그란 얇은 테 안경 -->
+  <!-- 왼쪽 렌즈 -->
+  <circle cx="42" cy="45" r="8" fill="none" stroke="#222222" stroke-width="1.5"/>
+  <!-- 오른쪽 렌즈 -->
+  <circle cx="58" cy="45" r="8" fill="none" stroke="#222222" stroke-width="1.5"/>
+  <!-- 안경 다리 및 연결 브릿지 -->
+  <line x1="50" y1="45" x2="50" y2="45" stroke="#222222" stroke-width="1.5"/>
+  <path d="M 46,44 Q 50,42 54,44" fill="none" stroke="#222222" stroke-width="1.5"/>
+  <line x1="34" y1="44" x2="29" y2="41" stroke="#222222" stroke-width="1.5"/>
+  <line x1="66" y1="44" x2="71" y2="41" stroke="#222222" stroke-width="1.5"/>
+</svg>
+"""
+
+# HTML/CSS를 활용해 제목 좌측에 선생님 캐릭터 배치
+st.markdown(
+    f"""
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+        <div>{teacher_svg}</div>
+        <h1 style="margin: 0; padding: 0; font-size: 2.2rem; color: #1E293B;">2회 시험 대비 서논술형 자동 채점 시스템</h1>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.write("왼쪽 길잡이 화면의 기준에 따라 채점이 진행됩니다.")
 
 selected_set_key = st.selectbox(
