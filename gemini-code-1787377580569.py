@@ -148,49 +148,63 @@ with st.sidebar:
   st.caption("2회 시험 대비 서논술형 학습 평가용")
 
 # ------------------------------------------------------------------------------
-# 3. 메인 화면 - 커스텀 헤더 (동그란 안경을 쓴 긴머리 여자 선생님 SVG 아이콘 적용)
+# 3. 메인 화면 - 귀여운 선생님 캐릭터 헤더
 # ------------------------------------------------------------------------------
 
-# 동그란 안경을 쓴 긴 머리 여자 선생님 캐릭터 SVG 코드
-teacher_svg = """
-<svg width="55" height="55" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <!-- 배경 원 -->
-  <circle cx="50" cy="50" r="48" fill="#E8F1F5"/>
-  <!-- 긴 머리 (뒷머리) -->
-  <path d="M 28,40 C 25,60 25,82 32,88 C 35,90 38,70 38,50 Z" fill="#3D2314"/>
-  <path d="M 72,40 C 75,60 75,82 68,88 C 65,90 62,70 62,50 Z" fill="#3D2314"/>
-  <!-- 몸/옷 -->
-  <path d="M 30,88 C 30,75 40,70 50,70 C 60,70 70,75 70,88 L 70,98 L 30,98 Z" fill="#4B6584"/>
-  <path d="M 45,70 L 50,78 L 55,70 Z" fill="#FFFFFF"/>
-  <!-- 얼굴 -->
-  <circle cx="50" cy="45" r="22" fill="#FAD390"/>
-  <!-- 앞머리 및 긴 머리 (앞쪽) -->
-  <path d="M 28,45 C 28,25 38,20 50,20 C 62,20 72,25 72,45 C 72,30 62,24 50,24 C 38,24 28,30 28,45 Z" fill="#3D2314"/>
-  <path d="M 32,28 C 40,24 45,30 50,28 C 55,26 62,25 68,29 C 62,22 55,21 50,21 C 42,21 35,24 32,28 Z" fill="#2C1A0E"/>
-  <!-- 눈 -->
-  <circle cx="42" cy="45" r="2.5" fill="#2C3A47"/>
-  <circle cx="58" cy="45" r="2.5" fill="#2C3A47"/>
-  <!-- 미소 -->
-  <path d="M 45,54 Q 50,58 55,54" fill="none" stroke="#B33939" stroke-width="2" stroke-linecap="round"/>
+# 동글동글하고 귀여운 긴 머리 안경 선생님 SVG 캐릭터
+cute_teacher_svg = """
+<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- 파스텔톤 동그란 배경 -->
+  <circle cx="50" cy="50" r="46" fill="#FFEAA7"/>
+  
+  <!-- 긴 머리 (뒤쪽) -->
+  <path d="M 22,48 C 20,72 25,88 34,92 C 37,80 35,60 35,48 Z" fill="#4A312C"/>
+  <path d="M 78,48 C 80,72 75,88 66,92 C 63,80 65,60 65,48 Z" fill="#4A312C"/>
+  
+  <!-- 상의 (귀여운 노란 핀 & 민트 카라 옷) -->
+  <path d="M 28,88 C 28,73 38,68 50,68 C 62,68 72,73 72,88 L 72,96 L 28,96 Z" fill="#55E6C1"/>
+  <path d="M 42,68 L 50,78 L 58,68 Z" fill="#FFFFFF"/>
+  <path d="M 50,78 L 50,96" stroke="#25CCF7" stroke-width="2"/>
+  
+  <!-- 동그란 얼굴 -->
+  <circle cx="50" cy="46" r="23" fill="#FFE0B2"/>
+  
+  <!-- 볼터치 (볼 홍조) -->
+  <circle cx="34" cy="52" r="4.5" fill="#FF8A80" opacity="0.6"/>
+  <circle cx="66" cy="52" r="4.5" fill="#FF8A80" opacity="0.6"/>
+  
+  <!-- 앞머리 (뱅 스타일) -->
+  <path d="M 27,42 C 27,24 37,20 50,20 C 63,20 73,24 73,42 C 73,34 65,25 50,25 C 35,25 27,34 27,42 Z" fill="#4A312C"/>
+  <path d="M 32,32 C 38,26 44,30 50,28 C 56,30 62,26 68,32 C 63,24 57,23 50,23 C 43,23 37,24 32,32 Z" fill="#38231F"/>
+  
+  <!-- 반짝이는 귀여운 눈 -->
+  <ellipse cx="39" cy="46" rx="3" ry="4" fill="#2C3A47"/>
+  <ellipse cx="61" cy="46" rx="3" ry="4" fill="#2C3A47"/>
+  <circle cx="40" cy="44.5" r="1.2" fill="#FFFFFF"/>
+  <circle cx="62" cy="44.5" r="1.2" fill="#FFFFFF"/>
+  
+  <!-- 해사한 웃는 입 -->
+  <path d="M 45,54 Q 50,59 55,54" fill="none" stroke="#D63031" stroke-width="2" stroke-linecap="round"/>
+  
   <!-- 동그란 얇은 테 안경 -->
-  <!-- 왼쪽 렌즈 -->
-  <circle cx="42" cy="45" r="8" fill="none" stroke="#222222" stroke-width="1.5"/>
-  <!-- 오른쪽 렌즈 -->
-  <circle cx="58" cy="45" r="8" fill="none" stroke="#222222" stroke-width="1.5"/>
-  <!-- 안경 다리 및 연결 브릿지 -->
-  <line x1="50" y1="45" x2="50" y2="45" stroke="#222222" stroke-width="1.5"/>
-  <path d="M 46,44 Q 50,42 54,44" fill="none" stroke="#222222" stroke-width="1.5"/>
-  <line x1="34" y1="44" x2="29" y2="41" stroke="#222222" stroke-width="1.5"/>
-  <line x1="66" y1="44" x2="71" y2="41" stroke="#222222" stroke-width="1.5"/>
+  <circle cx="39" cy="46" r="8.5" fill="none" stroke="#2D3436" stroke-width="1.8"/>
+  <circle cx="61" cy="46" r="8.5" fill="none" stroke="#2D3436" stroke-width="1.8"/>
+  <line x1="47.5" y1="46" x2="52.5" y2="46" stroke="#2D3436" stroke-width="1.8"/>
+  <line x1="30.5" y1="45" x2="26" y2="42" stroke="#2D3436" stroke-width="1.5"/>
+  <line x1="69.5" y1="45" x2="74" y2="42" stroke="#2D3436" stroke-width="1.5"/>
+  
+  <!-- 머리 핀 포인트 -->
+  <circle cx="30" cy="30" r="3" fill="#FF7675"/>
 </svg>
 """
 
-# HTML/CSS를 활용해 제목 좌측에 선생님 캐릭터 배치
 st.markdown(
     f"""
-    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-        <div>{teacher_svg}</div>
-        <h1 style="margin: 0; padding: 0; font-size: 2.2rem; color: #1E293B;">2회 시험 대비 서논술형 자동 채점 시스템</h1>
+    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+        <div>{cute_teacher_svg}</div>
+        <h1 style="margin: 0; padding: 0; font-size: 2.1rem; color: #2D3436; font-weight: 700;">
+            2회 시험 대비 서논술형 자동 채점 시스템
+        </h1>
     </div>
     """,
     unsafe_allow_html=True,
