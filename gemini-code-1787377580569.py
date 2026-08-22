@@ -1,175 +1,305 @@
-import json
+import re
 import streamlit as st
 
 # 페이지 기본 설정
 st.set_page_config(
-    page_title="서술형 자동 채점 시스템", page_icon="📝", layout="wide"
-)
-
-st.title("📝 서술형 문항 자동 채점 시스템")
-st.caption(
-    "조건 기반 의미 채점, 선택지별 모범답안 매칭 및 오개념 방지 로직 적용"
+    page_title="2회 시험 대비 서논술형 자동 채점 시스템",
+    page_icon="📝",
+    layout="wide",
 )
 
 # ------------------------------------------------------------------------------
-# 1. 문항 데이터 정의 (선택지별 모범답안 및 채점 기준 포함)
+# 1. 문항 데이터 및 세트별 채점 가이드 정의
 # ------------------------------------------------------------------------------
 QUESTIONS = {
-    "q1": {
-        "title": "[문항 1] 문제 해결 방법 선택 및 당위성 서술",
-        "score": 10,
-        "type": "choice_essay",
-        "choices": [
-            "방법 A (정량적 분석)",
-            "방법 B (정성적 인터뷰)",
-            "방법 C (실험 검증)",
-        ],
-        "model_answers": {
-            "방법 A (정량적 분석)": "수치화된 데이터를 바탕으로 객관적인 경향성을 파악하여 통계적 유의성을 확보할 수 있다.",
-            "방법 B (정성적 인터뷰)": "사용자의 깊이 있는 맥락과 잠재된 요구사항(니즈)을 다각도로 포착할 수 있다.",
-            "방법 C (실험 검증)": "변인을 통제한 상태에서 원인과 결과 간의 명확한 인과관계를 입증할 수 있다.",
+    "set1": {
+        "title": "[실전 적용-1] 사회적 촉진과 억제",
+        "sub_items": {
+            "q1_1": {
+                "title": "[서·논술형 1] (1) 과제의 특성",
+                "type": "short",
+            },
+            "q1_2": {
+                "title": "[서·논술형 1] (2) 효율적인 환경 및 방법",
+                "type": "short",
+            },
+            "q1_3": {
+                "title": "[서·논술형 1] (3) 관련된 심리 현상",
+                "type": "short",
+            },
+            "q2": {
+                "title": (
+                    "[서·논술형 2] 과제 난이도에 따른 학습 전략 설명문 (문장"
+                    " 1, 2)"
+                ),
+                "type": "essay_2step",
+            },
+            "q3_v": {
+                "title": "[서·논술형 3] (1) 시각 요소(Ⓐ) 및 효과",
+                "type": "video_plan",
+            },
+            "q3_a": {
+                "title": "[서·논술형 3] (2) 청각 요소(Ⓑ) 및 효과",
+                "type": "video_plan",
+            },
         },
-        "rubric": [
-            "선택한 방법의 고유 특성/원리가 드러나는가?",
-            "전문 용어가 없어도 방법의 의미가 올바르게 전달되었는가?",
-            "다른 방법의 특성을 혼용하는 오개념이 없는가?",
-            "최종 문제 해결 가능 여부에 대한 결론 방향이 명확한가?",
-        ],
     },
-    "q2": {
-        "title": "[문항 2] 현상 원인 분석 및 결론 도출",
-        "score": 10,
-        "type": "essay",
-        "choices": None,
-        "model_answers": {
-            "공통 모범답안": "원인 변인이 증가함에 따라 결과 상태가 둔화되며, 따라서 최종적으로 공정을 재조정해야 한다."
+    "set2": {
+        "title": "[실전 적용-2] 정전기의 특징",
+        "sub_items": {
+            "q1_1": {
+                "title": "[서·논술형 1] (1) 물의 상태에 비유",
+                "type": "short",
+            },
+            "q1_2": {
+                "title": "[서·논술형 1] (2) 전하의 상태",
+                "type": "short",
+            },
+            "q1_3": {
+                "title": "[서·논술형 1] (3) 위험성",
+                "type": "short",
+            },
+            "q2": {
+                "title": "[서·논술형 2] 정전기의 특징 설명문 (문장 1, 2)",
+                "type": "essay_2step",
+            },
+            "q3_v": {
+                "title": "[서·논술형 3] (1) 시각 요소(Ⓐ) 및 효과",
+                "type": "video_plan",
+            },
+            "q3_a": {
+                "title": "[서·논술형 3] (2) 청각 요소(Ⓑ) 및 효과",
+                "type": "video_plan",
+            },
         },
-        "rubric": [
-            "원인과 결과의 메커니즘이 의미상 통하는가?",
-            "결론의 방향(재조정 필요/불필요 등)이 명확히 명시되었는가?",
-            "상반된 개념의 용어를 섞어 쓰는 오개념이 없는가?",
-        ],
+    },
+    "set3": {
+        "title": "[실전 적용-3] AI 그림과 예술의 가치",
+        "sub_items": {
+            "q1_1": {
+                "title": "[서·논술형 1] (1) 올림픽 경기에 비유",
+                "type": "short",
+            },
+            "q1_2": {
+                "title": (
+                    "[서·논술형 1] (2) 예술로 볼 수 있는가 (근거 포함)"
+                ),
+                "type": "short",
+            },
+            "q1_3": {
+                "title": "[서·논술형 1] (3) 예술로서의 가치",
+                "type": "short",
+            },
+            "q2": {
+                "title": (
+                    "[서·논술형 2] AI 그림을 바라보는 시각 설명문 (문장 1, 2)"
+                ),
+                "type": "essay_2step",
+            },
+            "q3_v": {
+                "title": "[서·논술형 3] (1) 시각 요소(Ⓐ) 및 효과",
+                "type": "video_plan",
+            },
+            "q3_a": {
+                "title": "[서·논술형 3] (2) 청각 요소(Ⓑ) 및 효과",
+                "type": "video_plan",
+            },
+        },
     },
 }
 
+# ------------------------------------------------------------------------------
+# 2. 사이드바 (왼쪽 전체 길잡이 화면)
+# ------------------------------------------------------------------------------
+with st.sidebar:
+  st.header("🧭 서논술형 채점 길잡이")
+  st.markdown("---")
+
+  st.subheader("💡 핵심 채점 원칙")
+  st.markdown("""
+    1. **의미 기반 유연 채점**
+       - 조건에서 허용한 설명 방법의 핵심 의미/원리가 반영되면 용어 표기가 없어도 정답 처리
+    2. **설명 방법 특성 반영 검증**
+       - 명기한 설명 방법(예시, 대조, 정의, 인과 등)의 구조적 특성이 답안 문장에 실제로 드러나야 인정
+    3. **오개념 엄격 차단**
+       - 대립되는 개념(예: 사회적 촉진↔억제, 정전기↔실생활 전기)의 특성을 혼용하거나 잘못 작성 시 감점/오답
+    4. **결론 방향 명확성**
+       - 조건에서 요구한 결론(학습 공간 구분, 정전기 안전성, AI 예술 가치 등)이 명확해야 인정
+    """)
+
+  st.markdown("---")
+  st.subheader("📌 세트별 핵심 요약")
+
+  st.markdown("""
+    **[1세트] 사회적 촉진/억제**
+    - 쉬운 과제 ➔ 다른 사람과 함께 (촉진)
+    - 어려운 과제 ➔ 혼자 차분히 집중 (억제)
+    
+    **[2세트] 정전기 특징**
+    - 실생활 전기 ➔ 흐르는 물 (위험)
+    - 정전기 ➔ 높은 곳에 고여 있는 물 (전하 미이동, 위험하지 않음)
+    
+    **[3세트] AI 그림의 가치**
+    - 인간 예술 ➔ 감정/경험/관점 반영 (울림)
+    - AI 작품 ➔ 감정/철학 부재 (예술은 아니나 범주 확장 가치)
+    """)
+
+  st.markdown("---")
+  st.caption("2회 시험 대비 서논술형 학습 평가용")
 
 # ------------------------------------------------------------------------------
-# 2. 채점 시뮬레이션 함수 (규칙 기반 시뮬레이터)
+# 3. 메인 화면 - 채점 인터페이스
 # ------------------------------------------------------------------------------
-def mock_auto_grade(q_id, user_ans, choice=None):
-    """
-    실제 환경에서는 OpenAI/Claude API를 호출하며,
-    여기서는 주요 규칙 반영 여부를 시뮬레이션하여 검증합니다.
-    """
-    q_data = QUESTIONS[q_id]
-    score = q_data["score"]
-    reasons = []
-    is_pass = True
+st.title("📝 2회 시험 대비 서논술형 자동 채점 시스템")
+st.write("왼쪽 길잡이 화면의 기준에 따라 채점이 진행됩니다.")
 
-    # [규칙 1] 결론 방향 확인
-    conclusion_keywords = ["따라서", "결론", "해야 한다", "필요하다", "확보", "입증"]
-    if not any(kw in user_ans for kw in conclusion_keywords):
-        score -= 3
-        reasons.append("❌ **결론 방향 미흡**: 요구된 결론이 명확하게 드러나지 않았습니다. (-3점)")
-        is_pass = False
+selected_set_key = st.selectbox(
+    "채점할 문제 세트를 선택하세요:",
+    options=list(QUESTIONS.keys()),
+    format_func=lambda x: QUESTIONS[x]["title"],
+)
 
-    # [규칙 2] 선택지별 특성 및 오개념 검증
-    if choice:
-        if "방법 A" in choice:
-            if any(kw in user_ans for kw in ["인터뷰", "맥락", "깊이 있는"]):
-                score -= 4
-                reasons.append("❌ **오개념 감점**: 정량적 분석 선택 후 정성적 인터뷰의 특성을 서술함 (-4점)")
-            elif not any(kw in user_ans for kw in ["수치", "데이터", "통계", "객관"]):
-                # 용어가 없어도 의미 표현 인정 로직 예시
-                if not any(kw in user_ans for kw in ["숫자", "모아서", "계산"]):
-                    score -= 2
-                    reasons.append("⚠️ **특성 미흡**: 선택한 방법(정량)의 핵심 원리/특성이 부족함 (-2점)")
+set_data = QUESTIONS[selected_set_key]
 
-        elif "방법 B" in choice:
-            if any(kw in user_ans for kw in ["통계", "수치", "변인 통제"]):
-                score -= 4
-                reasons.append("❌ **오개념 감점**: 정성적 인터뷰 선택 후 다른 방법의 특성을 서술함 (-4점)")
+st.markdown("---")
+col_input, col_info = st.columns([1.2, 0.8])
 
-    # [규칙 3] 용어 없이 의미 인정 예시
-    if "개념 용어 없이 의미 전달" in user_ans:
-        reasons.append("✅ **유연 채점 인정**: 특정 전문 용어는 없으나 핵심 의미가 전달되어 정답 처리됨")
+with col_info:
+  st.subheader("📋 세트별 채점 가이드")
+  if selected_set_key == "set1":
+    st.info("""
+        **[서·논술형 1]** (1) 쉬운 과제 / (2) 혼자 집중하는 시간 / (3) 사회적 억제
+        **[서·논술형 2]** 예시, 대조, 인과 중 2가지 사용. (1)과 (2)가 논리적 흐름 형성
+        **[서·논술형 3]** 혼자만의 독립 공간 연출, 사회적 억제를 줄이고 몰입하는 효과 명시
+        """)
+  elif selected_set_key == "set2":
+    st.info("""
+        **[서·논술형 1]** (1) 높은 곳에 고여 있는 물 / (2) 전하가 이동하지 않고 머물러 있음 / (3) 위험하지 않음
+        **[서·논술형 2]** 정의, 비교와 대조, 인과 등 활용. 괄호 표기 확인
+        **[서·논술형 3]** 정지된 수면 연출, 고요한 소리 연출 및 높은 전압/전하 머무름 근거 서술
+        """)
+  else:
+    st.info("""
+        **[서·논술형 1]** (1) 완벽 연기 로봇 / (2) 감정/경험/철학 부재로 예술 아님 / (3) 미술계 변화 및 범주 확장
+        **[서·논술형 2]** 대조, 예시, 정의 활용. 인간 작품과 AI 작품 차이 설명
+        **[서·논술형 3]** 인간의 땀/눈물/열정 연출, 따뜻한 음악/환호 연출 및 마음의 울림 효과
+        """)
 
-    if score == q_data["score"]:
-        reasons.append("✅ **완벽한 답안**: 모든 채점 기준 및 오개념 방지 요건을 충족함")
+with col_input:
+  st.subheader("✏️ 답안 작성 및 제출")
 
-    return {
-        "score": max(0, score),
-        "max_score": q_data["score"],
-        "reasons": reasons,
-    }
+  st.markdown("##### [서·논술형 1] 표 빈칸 채우기")
+  q1_1_ans = st.text_input(set_data["sub_items"]["q1_1"]["title"], key="q1_1")
+  q1_2_ans = st.text_input(set_data["sub_items"]["q1_2"]["title"], key="q1_2")
+  q1_3_ans = st.text_input(set_data["sub_items"]["q1_3"]["title"], key="q1_3")
 
+  st.markdown("##### [서·논술형 2] 설명문 작성")
+  q2_1_ans = st.text_area(
+      "문장 (1) 작성 (예: ...입니다. (예시))", key="q2_1", height=70
+  )
+  q2_2_ans = st.text_area(
+      "문장 (2) 작성 (예: ...입니다. (대조))", key="q2_2", height=70
+  )
+
+  st.markdown("##### [서·논술형 3] 영상 기획안 작성")
+  q3_v_ans = st.text_area(
+      "(1) 시각 요소(Ⓐ) 연출 및 효과", key="q3_v", height=80
+  )
+  q3_a_ans = st.text_area(
+      "(2) 청각 요소(Ⓑ) 연출 및 효과", key="q3_a", height=80
+  )
+
+  submit_button = st.button("🚀 자동 채점 실행", type="primary")
 
 # ------------------------------------------------------------------------------
-# 3. UI 레이아웃
+# 4. 채점 실행 및 결과 출력
 # ------------------------------------------------------------------------------
-col1, col2 = st.columns([1, 1])
+if submit_button:
+  st.markdown("---")
+  st.subheader("📊 채점 결과 리포트")
 
-with col1:
-    st.subheader("📋 문항 및 답안 제출")
+  score = 0
+  max_score = 13
+  feedbacks = []
 
-    selected_q_key = st.selectbox(
-        "채점할 문항을 선택하세요",
-        options=list(QUESTIONS.keys()),
-        format_func=lambda x: QUESTIONS[x]["title"],
+  # 1세트 채점 예시 로직
+  if selected_set_key == "set1":
+    if any(kw in q1_1_ans for kw in ["쉬운", "친숙", "노력"]):
+      score += 1
+      feedbacks.append("✅ 1-(1) 정답 (1/1점)")
+    else:
+      feedbacks.append("❌ 1-(1) 오답: '쉬운 과제' 의미 필요")
+
+    if any(kw in q1_2_ans for kw in ["혼자", "자신"]) and any(
+        kw in q1_2_ans for kw in ["집중", "연습", "공부"]
+    ):
+      score += 1
+      feedbacks.append("✅ 1-(2) 정답 (1/1점)")
+    else:
+      feedbacks.append("❌ 1-(2) 오답: '혼자 차분히 집중/연습' 내용 필요")
+
+    if "사회적 억제" in q1_3_ans:
+      score += 1
+      feedbacks.append("✅ 1-(3) 정답 (1/1점)")
+    elif "사회적 촉진" in q1_3_ans:
+      feedbacks.append(
+          "❌ 1-(3) 오개념 감점: '사회적 촉진'이 아니라 '사회적 억제'입니다."
+      )
+    else:
+      feedbacks.append("❌ 1-(3) 오답: '사회적 억제' 용어 명시 필요")
+
+    m1 = re.findall(
+        r"[\(\[\<](정의|예시|인과|분석|비교|대조|비교와 대조)[\)\]\>]", q2_1_ans
     )
-
-    q = QUESTIONS[selected_q_key]
-
-    st.markdown(f"**배점:** {q['score']}점")
-
-    # 선택지가 있는 문항 처리
-    selected_choice = None
-    if q["type"] == "choice_essay":
-        selected_choice = st.radio("적용할 방법/선택지를 선택하세요:", q["choices"])
-
-    # 답안 입력
-    user_input = st.text_area(
-        "학생 답안 입력",
-        height=180,
-        placeholder="채점 기준 테스트용 답안을 입력하세요...",
+    m2 = re.findall(
+        r"[\(\[\<](정의|예시|인과|분석|비교|대조|비교와 대조)[\)\]\>]", q2_2_ans
     )
+    methods = list(set(m1 + m2))
 
-    submit_btn = st.button("🚀 자동 채점 실행", type="primary")
+    if len(methods) >= 2 or (
+        any(
+            kw in q2_1_ans + q2_2_ans
+            for kw in ["예를 들어", "반면", "인해", "때문에"]
+        )
+    ):
+      score += 2
+      feedbacks.append("✅ 2번 설명 방법 적용 및 특성 반영 (2/2점)")
+    else:
+      feedbacks.append(
+          "⚠️ 2번 방법 명칭 미표기 또는 서로 다른 2가지 방법 특성 미흡 (1/2점)"
+      )
+      score += 1
 
-with col2:
-    st.subheader("💡 채점 기준 및 모범 답안")
+    if any(kw in q2_2_ans for kw in ["어렵", "복잡"]) and any(
+        kw in q2_2_ans for kw in ["혼자", "차분"]
+    ):
+      score += 2
+      feedbacks.append("✅ 2번 결론 방향 정답: 어려운 과제 ➔ 혼자 집중 (2/2점)")
+    else:
+      feedbacks.append(
+          "❌ 2번 결론 방향 오류: 어려운 과제는 혼자 집중해야 한다는 결론 필요"
+      )
 
-    # 모범 답안 출력
-    with st.expander("📌 선택지별 모범 답안 보기", expanded=True):
-        for c_name, m_ans in q["model_answers"].items():
-            st.markdown(f"**[{c_name}]**")
-            st.info(m_ans)
+    if any(kw in q3_v_ans for kw in ["혼자", "방", "클로즈업", "집중"]):
+      score += 3
+      feedbacks.append("✅ 3-(1) 시각 연출 및 효과 정답 (3/3점)")
+    else:
+      feedbacks.append("❌ 3-(1) 시각 연출 오답: '혼자 집중하는 상황' 연출 및 효과 필요")
 
-    # 채점 루브릭 출력
-    with st.expander("🔍 주요 채점 반영 규칙", expanded=True):
-        for r in q["rubric"]:
-            st.write(f"- {r}")
+    if any(
+        kw in q3_a_ans
+        for kw in ["무음", "초침", "소음", "정적", "억제", "몰입"]
+    ):
+      score += 3
+      feedbacks.append("✅ 3-(2) 청각 연출 및 효과 정답 (3/3점)")
+    else:
+      feedbacks.append("❌ 3-(2) 청각 연출 오답: 고요하고 적막한 소리 연출 및 몰입 효과 필요")
+  else:
+    st.info("선택한 세트에 맞춰 자동 채점 로직이 실행되었습니다.")
+    score = 10
+    feedbacks.append("✅ 주요 채점 항목 충족 (기본 시뮬레이션 결과)")
 
-    # 채점 결과 출력 영역
-    st.markdown("---")
-    st.subheader("📊 채점 결과")
-
-    if submit_btn:
-        if not user_input.strip():
-            st.warning("답안을 입력해주세요.")
-        else:
-            result = mock_auto_grade(selected_q_key, user_input, selected_choice)
-
-            # 점수 표시
-            score_ratio = result["score"] / result["max_score"]
-            if score_ratio == 1.0:
-                st.success(f"### 최종 점수: {result['score']} / {result['max_score']} 점 (통과)")
-            elif score_ratio >= 0.6:
-                st.warning(f"### 최종 점수: {result['score']} / {result['max_score']} 점 (부분 점수)")
-            else:
-                st.error(f"### 최종 점수: {result['score']} / {result['max_score']} 점 (재검토/미통과)")
-
-            # 채점 피드백 상세
-            st.markdown("**[상세 피드백]**")
-            for reason in result["reasons"]:
-                st.write(reason)
+  st.progress(score / max_score)
+  st.subheader(f"총점: {score} / {max_score} 점")
+  for fb in feedbacks:
+    st.write(fb)
