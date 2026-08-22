@@ -148,60 +148,79 @@ with st.sidebar:
   st.caption("2회 시험 대비 서논술형 학습 평가용")
 
 # ------------------------------------------------------------------------------
-# 3. 메인 화면 - 귀여운 선생님 캐릭터 헤더
+# 3. 메인 화면 - 첨부 이미지 기반 (왕눈이 커스텀 SVG)
 # ------------------------------------------------------------------------------
 
-# 동글동글하고 귀여운 긴 머리 안경 선생님 SVG 캐릭터
-cute_teacher_svg = """
-<svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <!-- 파스텔톤 동그란 배경 -->
-  <circle cx="50" cy="50" r="46" fill="#FFEAA7"/>
-  
-  <!-- 긴 머리 (뒤쪽) -->
-  <path d="M 22,48 C 20,72 25,88 34,92 C 37,80 35,60 35,48 Z" fill="#4A312C"/>
-  <path d="M 78,48 C 80,72 75,88 66,92 C 63,80 65,60 65,48 Z" fill="#4A312C"/>
-  
-  <!-- 상의 (귀여운 노란 핀 & 민트 카라 옷) -->
-  <path d="M 28,88 C 28,73 38,68 50,68 C 62,68 72,73 72,88 L 72,96 L 28,96 Z" fill="#55E6C1"/>
-  <path d="M 42,68 L 50,78 L 58,68 Z" fill="#FFFFFF"/>
-  <path d="M 50,78 L 50,96" stroke="#25CCF7" stroke-width="2"/>
-  
-  <!-- 동그란 얼굴 -->
-  <circle cx="50" cy="46" r="23" fill="#FFE0B2"/>
-  
-  <!-- 볼터치 (볼 홍조) -->
-  <circle cx="34" cy="52" r="4.5" fill="#FF8A80" opacity="0.6"/>
-  <circle cx="66" cy="52" r="4.5" fill="#FF8A80" opacity="0.6"/>
-  
-  <!-- 앞머리 (뱅 스타일) -->
-  <path d="M 27,42 C 27,24 37,20 50,20 C 63,20 73,24 73,42 C 73,34 65,25 50,25 C 35,25 27,34 27,42 Z" fill="#4A312C"/>
-  <path d="M 32,32 C 38,26 44,30 50,28 C 56,30 62,26 68,32 C 63,24 57,23 50,23 C 43,23 37,24 32,32 Z" fill="#38231F"/>
-  
-  <!-- 반짝이는 귀여운 눈 -->
-  <ellipse cx="39" cy="46" rx="3" ry="4" fill="#2C3A47"/>
-  <ellipse cx="61" cy="46" rx="3" ry="4" fill="#2C3A47"/>
-  <circle cx="40" cy="44.5" r="1.2" fill="#FFFFFF"/>
-  <circle cx="62" cy="44.5" r="1.2" fill="#FFFFFF"/>
-  
-  <!-- 해사한 웃는 입 -->
-  <path d="M 45,54 Q 50,59 55,54" fill="none" stroke="#D63031" stroke-width="2" stroke-linecap="round"/>
-  
-  <!-- 동그란 얇은 테 안경 -->
-  <circle cx="39" cy="46" r="8.5" fill="none" stroke="#2D3436" stroke-width="1.8"/>
-  <circle cx="61" cy="46" r="8.5" fill="none" stroke="#2D3436" stroke-width="1.8"/>
-  <line x1="47.5" y1="46" x2="52.5" y2="46" stroke="#2D3436" stroke-width="1.8"/>
-  <line x1="30.5" y1="45" x2="26" y2="42" stroke="#2D3436" stroke-width="1.5"/>
-  <line x1="69.5" y1="45" x2="74" y2="42" stroke="#2D3436" stroke-width="1.5"/>
-  
-  <!-- 머리 핀 포인트 -->
-  <circle cx="30" cy="30" r="3" fill="#FF7675"/>
+# 이미지 디자인을 본뜬 SVG (왕눈이 버전)
+teacher_image_svg = """
+<svg width="65" height="65" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="skinGlow" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#FFF0E6"/>
+      <stop offset="100%" stop-color="#FCD2C1"/>
+    </radialGradient>
+    <radialGradient id="cheekGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF758C" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#FF758C" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 어깨까지 내려오는 흑발 뒷머리 -->
+  <path d="M 22,40 C 18,65 22,88 32,92 C 38,95 42,75 42,50 Z" fill="#1E2022"/>
+  <path d="M 78,40 C 82,65 78,88 68,92 C 62,95 58,75 58,50 Z" fill="#1E2022"/>
+
+  <!-- 목 및 핑크색 니트 상의 -->
+  <rect x="44" y="65" width="12" height="15" fill="#FCD2C1" rx="3"/>
+  <path d="M 24,90 C 24,78 35,74 50,74 C 65,74 76,78 76,90 L 76,98 L 24,98 Z" fill="#D980A9"/>
+  <path d="M 40,74 C 45,78 55,78 60,74 C 55,82 45,82 40,74 Z" fill="#C36B94"/>
+
+  <!-- 계란형 얼굴 -->
+  <path d="M 27,42 C 27,20 73,20 73,42 C 73,62 60,70 50,70 C 40,70 27,62 27,42 Z" fill="url(#skinGlow)"/>
+
+  <!-- 귀 -->
+  <circle cx="26" cy="46" r="4" fill="#FCD2C1"/>
+  <circle cx="74" cy="46" r="4" fill="#FCD2C1"/>
+
+  <!-- 분홍빛 뺨 (볼터치) -->
+  <circle cx="34" cy="51" r="6" fill="url(#cheekGlow)"/>
+  <circle cx="66" cy="51" r="6" fill="url(#cheekGlow)"/>
+
+  <!-- 센터 가르마 앞머리 -->
+  <path d="M 27,38 C 27,24 38,18 50,22 C 45,26 36,30 32,40 Z" fill="#2B2D30"/>
+  <path d="M 73,38 C 73,24 62,18 50,22 C 55,26 64,30 68,40 Z" fill="#2B2D30"/>
+
+  <!-- 굵고 눈부신 '큰 눈' (요청사항 반영) -->
+  <!-- 눈백자 -->
+  <ellipse cx="37" cy="45" rx="5.5" ry="6.5" fill="#FFFFFF"/>
+  <ellipse cx="63" cy="45" rx="5.5" ry="6.5" fill="#FFFFFF"/>
+  <!-- 눈동자 (더 크게 확대) -->
+  <ellipse cx="37" cy="45" rx="4.5" ry="5.5" fill="#1E100B"/>
+  <ellipse cx="63" cy="45" rx="4.5" ry="5.5" fill="#1E100B"/>
+  <circle cx="38.5" cy="43" r="2" fill="#FFFFFF"/>
+  <circle cx="64.5" cy="43" r="2" fill="#FFFFFF"/>
+  <circle cx="35.5" cy="47" r="1" fill="#FFFFFF"/>
+  <circle cx="61.5" cy="47" r="1" fill="#FFFFFF"/>
+
+  <!-- 눈썹 -->
+  <path d="M 31,35 Q 37,33 43,36" fill="none" stroke="#2B2D30" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M 69,35 Q 63,33 57,36" fill="none" stroke="#2B2D30" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- 미소 띤 입술 -->
+  <path d="M 43,58 Q 50,65 57,58 C 55,61 45,61 43,58 Z" fill="#E85A71"/>
+
+  <!-- 동그란 검은색 얇은 뿔테 안경 -->
+  <circle cx="37" cy="45" r="10.5" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+  <circle cx="63" cy="45" r="10.5" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+  <path d="M 47.5,44 Q 50,42.5 52.5,44" fill="none" stroke="#1A1A1A" stroke-width="2"/>
+  <line x1="26.5" y1="44" x2="22" y2="42" stroke="#1A1A1A" stroke-width="1.8"/>
+  <line x1="73.5" y1="44" x2="78" y2="42" stroke="#1A1A1A" stroke-width="1.8"/>
 </svg>
 """
 
 st.markdown(
     f"""
     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
-        <div>{cute_teacher_svg}</div>
+        <div>{teacher_image_svg}</div>
         <h1 style="margin: 0; padding: 0; font-size: 2.1rem; color: #2D3436; font-weight: 700;">
             2회 시험 대비 서논술형 자동 채점 시스템
         </h1>
